@@ -1,6 +1,7 @@
 import json
 import os
 import urllib2
+import glob
 
 from bs4 import BeautifulSoup
 
@@ -80,7 +81,14 @@ class Manga(object):
 		except OSError:
 			os.mkdir(chapter_path)
 
+		print 'pages:', len(page_list)
+		existing_pages = glob.glob(os.path.join(chapter_path, '*.*'))
+		last_page = len(existing_pages)
+
 		for i, page in enumerate(page_list):
+			if i < last_page:
+				print 'skipping page', i
+				continue
 			html = fetch_html(page)
 			soup = BeautifulSoup(html)
 			imgs = soup.select('#viewer img')
