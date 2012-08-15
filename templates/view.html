@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>{{ manga.name }}</title>
+		<script>
+function handleArrowKeys(evt) {
+    evt = (evt) ? evt : ((window.event) ? event : null);
+    if (evt) {
+        switch (evt.keyCode) {
+            case 37:
+                // left
+                window.location.href = "{{ prev_page_url }}"
+                break;
+            case 39:
+                // right
+                window.location.href = "{{ next_page_url }}"
+                break;
+         }
+    }
+}
+
+document.onkeyup = handleArrowKeys;
+
+		</script>
+	</head>
+	<body>
+		<img src="{{ page_image }}" alt="page-{{ page }}" />
+		<p>
+			<a href="{{ prev_page_url }}">prev</a> <a href="{{ next_page_url }}">next</a>
+		</p>
+		<p>Chapter {{ chapter }} page {{ page }}</p>
+	</body>
+</html>

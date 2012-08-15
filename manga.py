@@ -1,3 +1,4 @@
+import base64
 import json
 import os
 import urllib2
@@ -21,10 +22,15 @@ class Mangas(object):
 	def get_manga(self, name):
 		return Manga(name, self.mangas[name])
 
+	def get_manga_b64(self, b64_name):
+		name = base64.urlsafe_b64decode(b64_name)
+		return Manga(name, self.mangas[name])
+
 
 class Manga(object):
 	def __init__(self, name, url):
 		self.name = name
+		self.b64name = base64.urlsafe_b64encode(name)
 		self.url = url
 		self.manga_path = os.path.join('download', self.name)
 		self.chapters_path = os.path.join(self.manga_path, 'chapters.json')
@@ -58,6 +64,23 @@ class Manga(object):
 
 		return len(chapters)
 
+	def total_pages(self, chapter):
+		chapter_path = os.path.join(self.manga_path, str(chapter))
+		file_list = []
+		for item in os.listdir(chapter_path):
+			if os.path.isfile(os.path.join(chapter_path, item)):
+				file_list.append(item)
+		return len(file_list)
+
+	def get_pages(self, chapter):
+		chapter_path = os.path.join(self.manga_path, str(chapter))
+		file_list = []
+		for item in os.listdir(chapter_path):
+			if os.path.isfile(os.path.join(chapter_path, item)):
+				file_list.append('%s/%d/%s' % (self.name, chapter, item))
+		file_list.sort()
+		return file_list
+
 	def download_chapter(self, chapter):
 		with open(self.chapters_path) as f:
 			chapters = json.load(f)
@@ -65,7 +88,7 @@ class Manga(object):
 		name = chapters[chapter][0]
 		url = chapters[chapter][1]
 
-		print 'retrieving page list...'
+		print 'retrieving page list for chaper %d ...' % chapter
 		page_list = []
 		html = fetch_html(url)
 		soup = BeautifulSoup(html)
@@ -97,9 +120,12 @@ class Manga(object):
 			img_path = os.path.join(chapter_path, filename)
 			
 			print 'downloading', img_path
-			data = fetch_html(img_url)
-			with open(img_path, 'wb') as f:
-				f.write(data)
+			try:
+				data = fetch_html(img_url)
+				with open(img_path, 'wb') as f:
+					f.write(data)
+			except urllib2.HTTPError, e:
+				print 'download failed: %s' % e
 		print 'DONE!'
 
 
@@ -159,11 +185,35 @@ def download_chapter(name, chapter, db_update=False):
 	tor.download_chapter(chapter)
 
 
-def download(name, db_update=False):
+def download(name, start=0, db_update=True):
 	m = load_mangas()
 	mg = m.get_manga(name)
 	if db_update:
 		mg.update()
 
 	for chapter in xrange(mg.total_chapters()):
+		if chapter < start:
+			print 'skipping chapter', chapter
+			continue
 		mg.download_chapter(chapter)
+
+def get_dowloaded_manga():
+	dir_list = []
+	for item in os.listdir('./download/'):
+		if os.path.isdir(os.path.join('./download', item)):
+			dir_list.append(item)
+
+	m = load_mangas()
+	manga_list = []
+	for manga_name in dir_list:
+		try:
+			mg = m.get_manga(manga_name)
+			manga_list.append(mg)
+		except KeyError:
+			pass
+
+	return manga_list
+
+def get_manga(name):
+	m = load_mangas()
+	return m.get_manga(name)

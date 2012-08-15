@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<title>Manga Reader</title>
+	</head>
+	<body>
+		<ul>
+			{% for manga in manga_list %}
+			<li><a href="manga?name={{ manga.name }}&chapter=0&page=0">{{ manga.name }}</a></li>
+			{% end %}
+		</ul>
+	</body>
+</html>
