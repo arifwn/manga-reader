@@ -6,7 +6,10 @@
 	<body>
 		<ul>
 			{% for manga in manga_list %}
-			<li><a href="manga?name={{ manga.name }}&chapter=0&page=0">{{ manga.name }}</a></li>
+			<li>
+				<a href="manga?name={{ manga.name }}&chapter=0&page=0">{{ manga.name }}</a>
+				[<a href="{{ last_view(manga.name) }}">last view</a>]
+			</li>
 			{% end %}
 		</ul>
 	</body>

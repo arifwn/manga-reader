@@ -24,10 +24,15 @@ document.onkeyup = handleArrowKeys;
 		</script>
 	</head>
 	<body>
-		<img src="{{ page_image }}" alt="page-{{ page }}" />
-		<p>
-			<a href="{{ prev_page_url }}">prev</a> <a href="{{ next_page_url }}">next</a>
-		</p>
-		<p>Chapter {{ chapter }} page {{ page }}</p>
+		<div style="text-align: center;">
+			<a href="{{ next_page_url }}"><img src="{{ page_image }}" alt="page-{{ page }}" style="max-width: 100%;" /></a>
+			<p>
+				<a href="{{ prev_page_url }}">prev</a> <a href="{{ next_page_url }}">next</a>
+			</p>
+			<p>
+				<a href="/">home</a>
+			</p>
+			<p>Chapter {{ chapter }} page {{ page }}</p>
+		</div>
 	</body>
 </html>
