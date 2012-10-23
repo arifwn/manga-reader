@@ -31,7 +31,7 @@ class MangaHandler(tornado.web.RequestHandler):
         total_pages = m.total_pages(chapter)
 
         last_page_url = '/manga?name=%s&chapter=%d&page=%d' % (name, chapter, page)
-        self.set_secure_cookie(name.replace(' ', '-'), last_page_url)
+        self.set_secure_cookie(name.replace(' ', '-'), last_page_url, 365)
 
         if (page + 1) >= total_pages:
             _chapter = chapter + 1
@@ -60,7 +60,7 @@ class MangaHandler(tornado.web.RequestHandler):
                     manga=m,
                     chapter=chapter,
                     page=page,
-                    page_image=self.static_url(pages[page]),
+                    page_image=self.static_url('download/'+pages[page]),
                     next_page_url=next_page_url,
                     prev_page_url=prev_page_url)
 
@@ -68,7 +68,7 @@ settings = {
     'cookie_secret': '61oETzKXQAGaYdkL5gEmGeJJFuYh7EQnp2XdTP1o/Vo=',
     'login_url': '/login',
     'xsrf_cookies': True,
-    'static_path': os.path.join(os.path.dirname(__file__), 'download'),
+    'static_path': os.path.join(os.path.dirname(__file__), 'media'),
     'debug': True,
 }
 

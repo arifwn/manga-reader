@@ -33,7 +33,7 @@ class Manga(object):
         self.name = name
         self.b64name = base64.urlsafe_b64encode(name)
         self.url = url
-        self.manga_path = os.path.join('download', self.name)
+        self.manga_path = os.path.join('media', 'download', self.name)
         self.chapters_path = os.path.join(self.manga_path, 'chapters.json')
 
     def update(self):
@@ -82,12 +82,23 @@ class Manga(object):
         file_list.sort()
         return file_list
 
-    def download_chapter(self, chapter):
+    def download_chapter(self, chapter, skip_downloaded=False):
         with open(self.chapters_path) as f:
             chapters = json.load(f)
 
         name = chapters[chapter][0]
         url = chapters[chapter][1]
+
+        if skip_downloaded:
+            chapter_path = os.path.join(self.manga_path, str(chapter))
+            try:
+                os.stat(chapter_path)
+                # already downloaded, skip it
+                print 'skipping chapter %d' % chapter
+                return
+            except OSError:
+                # not downloaded yet
+                pass
 
         print 'retrieving page list for chaper %d ...' % chapter
         page_list = []
@@ -163,7 +174,7 @@ def update_manga_list():
     print 'parsing data...'
     mangas = get_mangas(data)
 
-    with open('download/manga-list.json', 'w') as f:
+    with open('media/download/manga-list.json', 'w') as f:
         json.dump(mangas, f)
 
     print 'DONE!'
@@ -171,7 +182,7 @@ def update_manga_list():
 
 def load_mangas():
     '''Load manga list from database'''
-    with open('download/manga-list.json') as f:
+    with open('media/download/manga-list.json') as f:
         data = json.load(f)
 
     return Mangas(data)
@@ -186,10 +197,10 @@ def load_soup(path):
 
 def download_chapter(name, chapter, db_update=False):
     m = load_mangas()
-    tor = m.get_manga(name)
+    mg = m.get_manga(name)
     if db_update:
-        tor.update()
-    tor.download_chapter(chapter)
+        mg.update()
+    mg.download_chapter(chapter)
 
 
 def download(name, start=0, db_update=True):
@@ -202,13 +213,15 @@ def download(name, start=0, db_update=True):
         if chapter < start:
             print 'skipping chapter', chapter
             continue
-        mg.download_chapter(chapter)
+        mg.download_chapter(chapter, True)
 
 def get_dowloaded_manga():
     dir_list = []
-    for item in os.listdir('./download/'):
-        if os.path.isdir(os.path.join('./download', item)):
+    for item in os.listdir('media/download/'):
+        if os.path.isdir(os.path.join('media/download', item)):
             dir_list.append(item)
+
+    dir_list = sorted(dir_list)
 
     m = load_mangas()
     manga_list = []
@@ -229,3 +242,8 @@ def find_manga(name):
     m = load_mangas()
     return m.find_manga(name)
     
+def update_all():
+    manga_list = get_dowloaded_manga()
+
+    for manga in manga_list:
+        download(manga.name)
