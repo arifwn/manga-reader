@@ -27,7 +27,12 @@ document.onkeyup = handleArrowKeys;
 		<div style="text-align: center;">
 			<a href="{{ next_page_url }}"><img src="{{ page_image }}" alt="page-{{ page }}" style="max-width: 100%;" /></a>
 			<p>
-				<a href="{{ prev_page_url }}">prev</a> <a href="{{ next_page_url }}">next</a>
+				{% if prev_page_url %}
+				<a href="{{ prev_page_url }}">prev</a>
+				{% end if %}
+				{% if next_page_url %}
+				<a href="{{ next_page_url }}">next</a>
+				{% end if %}
 			</p>
 			<p>
 				<a href="/">home</a>
