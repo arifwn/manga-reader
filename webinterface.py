@@ -18,7 +18,20 @@ class MainHandler(tornado.web.RequestHandler):
                 url = '/manga?name=%s&chapter=0&page=0' % name
             return url
 
-        self.render('./templates/index.html', manga_list=manga_list, last_view=last_view_func)
+        def last_chapter_func(name):
+            chapter = self.get_secure_cookie(name.replace(' ', '-')+'-last-chapter')
+            if chapter is None:
+                chapter = 0
+            return int(chapter) + 1
+
+        def total_chapter_func(name):
+            m = manga.get_manga(name)
+            return len(m.get_chapters())
+
+        self.render('./templates/index.html', manga_list=manga_list, 
+                    last_view=last_view_func, 
+                    last_chapter=last_chapter_func,
+                    total_chapter=total_chapter_func)
 
 
 class MangaHandler(tornado.web.RequestHandler):
@@ -32,6 +45,8 @@ class MangaHandler(tornado.web.RequestHandler):
 
         last_page_url = '/manga?name=%s&chapter=%d&page=%d' % (name, chapter, page)
         self.set_secure_cookie(name.replace(' ', '-'), last_page_url, 365)
+        self.set_secure_cookie(name.replace(' ', '-')+'-last-chapter', str(chapter), 365)
+        self.set_secure_cookie(name.replace(' ', '-')+'-last-page', str(page), 365)
 
         if (page + 1) >= total_pages:
             _chapter = chapter + 1

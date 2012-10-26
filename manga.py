@@ -36,6 +36,12 @@ class Manga(object):
         self.manga_path = os.path.join('media', 'download', self.name)
         self.chapters_path = os.path.join(self.manga_path, 'chapters.json')
 
+    def get_chapters(self):
+        chapters = []
+        with open(self.chapters_path) as f:
+            chapters = json.load(f)
+        return chapters
+
     def update(self):
         try:
             os.stat(self.manga_path)
