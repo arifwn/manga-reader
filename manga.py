@@ -4,6 +4,7 @@ import os
 import urllib2
 import glob
 import time
+import urlparse
 
 from bs4 import BeautifulSoup
 
@@ -126,7 +127,9 @@ class Manga(object):
         existing_pages = glob.glob(os.path.join(chapter_path, '*.*'))
         last_page = len(existing_pages)
 
-        for i, page in enumerate(page_list):
+        i = 0
+        while i < len(page_list):
+            page = page_list[i]
             if i < last_page:
                 print 'skipping page', i
                 continue
@@ -138,12 +141,17 @@ class Manga(object):
             img_path = os.path.join(chapter_path, filename)
             
             print 'downloading', img_path
+            parsed_url = urlparse.urlparse(img_url)
+            img_url = 'http://www.mangahere.com' + parsed_url.path
             try:
                 data = fetch_html(img_url)
                 with open(img_path, 'wb') as f:
                     f.write(data)
             except urllib2.HTTPError, e:
-                print 'download failed: %s' % e
+                print 'download failed: %s Retrying...' % e
+                continue
+            i += 1
+
         print 'DONE!'
 
 
@@ -154,8 +162,8 @@ def fetch_html(url):
             f = urllib2.urlopen(url)
             return f.read()
         except urllib2.URLError, e:
-            print 'fetch failed! retrying...'
-            time.sleep(1)
+            print 'fetch failed! retrying... [%d]' % i
+            time.sleep(i)
     raise e
 
 
