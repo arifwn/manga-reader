@@ -112,6 +112,15 @@ class Manga(object):
         html = fetch_html(url)
         soup = BeautifulSoup(html)
         sel = soup.select('.wid60')
+        if len(sel) == 0:
+            print 'SKIP this chapter...'
+            chapter_path = os.path.join(self.manga_path, str(chapter))
+            try:
+                os.stat(chapter_path)
+            except OSError:
+                os.mkdir(chapter_path)
+            return
+
         options = sel[0].select('option')
         for option in options:
             page_list.append(option.get('value'))

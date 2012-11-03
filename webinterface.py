@@ -28,10 +28,19 @@ class MainHandler(tornado.web.RequestHandler):
             m = manga.get_manga(name)
             return len(m.get_chapters())
 
+        def has_update_func(name):
+            last_chapter = last_chapter_func(name)
+            total_chapter = total_chapter_func(name)
+            if total_chapter > last_chapter:
+                return True
+            else:
+                return False
+
         self.render('./templates/index.html', manga_list=manga_list, 
                     last_view=last_view_func, 
                     last_chapter=last_chapter_func,
-                    total_chapter=total_chapter_func)
+                    total_chapter=total_chapter_func,
+                    has_update=has_update_func)
 
 
 class MangaHandler(tornado.web.RequestHandler):
