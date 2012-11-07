@@ -146,12 +146,18 @@ class Manga(object):
             soup = BeautifulSoup(html)
             imgs = soup.select('#viewer img')
             img_url = imgs[0].get('src')
-            filename = '%03d_%s' % (i, os.path.split(img_url)[1])
+            parsed_url = urlparse.urlparse(img_url)
+
+            if parsed_url.path[0] == '/':
+                img_url = 'http://www.mangahere.com' + parsed_url.path
+            else:
+                img_url = 'http://www.mangahere.com/' + parsed_url.path
+            
+            filename = '%03d_%s' % (i, os.path.split(parsed_url.path)[1])
             img_path = os.path.join(chapter_path, filename)
             
             print 'downloading', img_path
-            parsed_url = urlparse.urlparse(img_url)
-            img_url = 'http://www.mangahere.com' + parsed_url.path
+            
             try:
                 data = fetch_html(img_url)
                 with open(img_path, 'wb') as f:
