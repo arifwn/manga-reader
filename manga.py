@@ -149,9 +149,16 @@ class Manga(object):
             parsed_url = urlparse.urlparse(img_url)
 
             if parsed_url.path[0] == '/':
-                img_url = 'http://www.mangahere.com' + parsed_url.path
+                img_url = parsed_url.scheme + '://' + parsed_url.hostname + parsed_url.path
             else:
-                img_url = 'http://www.mangahere.com/' + parsed_url.path
+                img_url = parsed_url.scheme + '://' + parsed_url.hostname + '/' + parsed_url.path
+
+            # if parsed_url.path[0] == '/':
+            #     img_url = 'http://www.mangahere.com' + parsed_url.path
+            # else:
+            #     img_url = 'http://www.mangahere.com' + '/' + parsed_url.path
+
+            print img_url
             
             filename = '%03d_%s' % (i, os.path.split(parsed_url.path)[1])
             img_path = os.path.join(chapter_path, filename)

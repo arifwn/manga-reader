@@ -13,13 +13,19 @@ class MainHandler(tornado.web.RequestHandler):
         manga_list = manga.get_dowloaded_manga()
 
         def last_view_func(name):
-            url = self.get_secure_cookie(name.replace(' ', '-'))
+            cookie_key = name.replace(' ', '-')
+            cookie_key = cookie_key.replace('(', '-')
+            cookie_key = cookie_key.replace(')', '-')
+            url = self.get_secure_cookie(cookie_key)
             if url is None:
                 url = '/manga?name=%s&chapter=0&page=0' % name
             return url
 
         def last_chapter_func(name):
-            chapter = self.get_secure_cookie(name.replace(' ', '-')+'-last-chapter')
+            cookie_key = name.replace(' ', '-')
+            cookie_key = cookie_key.replace('(', '-')
+            cookie_key = cookie_key.replace(')', '-')
+            chapter = self.get_secure_cookie(cookie_key+'-last-chapter')
             if chapter is None:
                 chapter = 0
             return int(chapter) + 1
@@ -53,9 +59,12 @@ class MangaHandler(tornado.web.RequestHandler):
         total_pages = m.total_pages(chapter)
 
         last_page_url = '/manga?name=%s&chapter=%d&page=%d' % (name, chapter, page)
-        self.set_secure_cookie(name.replace(' ', '-'), last_page_url, 365)
-        self.set_secure_cookie(name.replace(' ', '-')+'-last-chapter', str(chapter), 365)
-        self.set_secure_cookie(name.replace(' ', '-')+'-last-page', str(page), 365)
+        cookie_key = name.replace(' ', '-')
+        cookie_key = cookie_key.replace('(', '-')
+        cookie_key = cookie_key.replace(')', '-')
+        self.set_secure_cookie(cookie_key, last_page_url, 365)
+        self.set_secure_cookie(cookie_key+'-last-chapter', str(chapter), 365)
+        self.set_secure_cookie(cookie_key+'-last-page', str(page), 365)
 
         if (page + 1) >= total_pages:
             _chapter = chapter + 1
